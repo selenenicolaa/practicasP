@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lista de productos</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+</head>
+<body>
+  <div class="container mt-4">
+    <h2 class="mb-3">Lista de productos</h2>
+    <button class="btn btn-outline-info mb-3" id="btnAgregar">Agregar un nuevo producto</button>
+
+    <table class="table" id="miTabla">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Producto</th>
+          <th>Cantidad</th>
+          <th>Precio</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">1</th>
+          <td>Pan</td>
+          <td>5</td>
+          <td>$200</td>
+          <td>
+            <button class="btn btn-outline-success btn-sm btn-actualizar">Actualizar</button>
+            <button class="btn btn-outline-danger btn-sm btn-borrar">Borrar</button>
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">2</th>
+          <td>Leche</td>
+          <td>3</td>
+          <td>$150</td>
+          <td>
+            <button class="btn btn-outline-success btn-sm btn-actualizar">Actualizar</button>
+            <button class="btn btn-outline-danger btn-sm btn-borrar">Borrar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Actualizar datos</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <input type="hidden" id="modoModal" value="actualizar">
+            <div class="mb-3">
+              <label for="producto" class="form-label">Producto:</label>
+              <input type="text" class="form-control" id="producto">
+            </div>
+            <div class="mb-3">
+              <label for="cantidad" class="form-label">Cantidad:</label>
+              <input type="number" class="form-control" id="cantidad">
+            </div>
+            <div class="mb-3">
+              <label for="precio" class="form-label">Precio:</label>
+              <input type="text" class="form-control" id="precio">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="guardarCambios">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const tabla = document.getElementById("miTabla");
+    let filaSeleccionada = null;
+    const modal = new bootstrap.Modal(document.getElementById("exampleModal"));
+
+    document.getElementById("btnAgregar").addEventListener("click", () => {
+      document.getElementById("modoModal").value = "agregar";
+      document.getElementById("producto").value = "";
+      document.getElementById("cantidad").value = "";
+      document.getElementById("precio").value = "";
+      modal.show();
+    });
+
+    tabla.addEventListener("click", function(e) {
+      if (e.target.classList.contains("btn-actualizar")) {
+        filaSeleccionada = e.target.closest("tr");
+        const celdas = filaSeleccionada.querySelectorAll("td");
+        document.getElementById("producto").value = celdas[0].innerText;
+        document.getElementById("cantidad").value = celdas[1].innerText;
+        document.getElementById("precio").value = celdas[2].innerText;
+        document.getElementById("modoModal").value = "actualizar";
+        modal.show();
+      }
+
+      if (e.target.classList.contains("btn-borrar")) {
+        const fila = e.target.closest("tr");
+        const producto = fila.querySelector("td").innerText;
+        if (confirm(`¿Estás seguro de que querés borrar "${producto}"?`)) {
+          fila.remove();
+          actualizarNumeracion();
+        }
+      }
+    });
+
+    document.getElementById("guardarCambios").addEventListener("click", function() {
+      const producto = document.getElementById("producto").value;
+      const cantidad = document.getElementById("cantidad").value;
+      const precio = document.getElementById("precio").value;
+      const modo = document.getElementById("modoModal").value;
+
+      if (modo === "actualizar" && filaSeleccionada) {
+        const celdas = filaSeleccionada.querySelectorAll("td");
+        celdas[0].innerText = producto;
+        celdas[1].innerText = cantidad;
+        celdas[2].innerText = precio;
+      } else if (modo === "agregar") {
+        const nuevaFila = document.createElement("tr");
+        nuevaFila.innerHTML = `
+          <th scope="row"></th>
+          <td>${producto}</td>
+          <td>${cantidad}</td>
+          <td>${precio}</td>
+          <td>
+            <button class="btn btn-outline-success btn-sm btn-actualizar">Actualizar</button>
+            <button class="btn btn-outline-danger btn-sm btn-borrar">Borrar</button>
+          </td>
+        `;
+        tabla.querySelector("tbody").appendChild(nuevaFila);
+        actualizarNumeracion();
+      }
+
+      modal.hide();
+    });
+
+    function actualizarNumeracion() {
+      const filas = tabla.querySelectorAll("tbody tr");
+      filas.forEach((fila, index) => {
+        fila.querySelector("th").innerText = index + 1;
+      });
+    }
+  </script>
+</body>
+</html>
